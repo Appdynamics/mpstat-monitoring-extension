@@ -4,7 +4,8 @@
 
 Use for monitoring performance statistics for all logical processors in the system.
 
-It uses the mpstat command to retrieve the metrics and is currently supported for Linux and Solaris machines.
+This extension executes the mpstat command to retrieve the metrics and is currently supported for Linux and Solaris systems.
+
 This extension only works with standalone machine agent and requires it to be deployed on the machine you want to monitor.
 
 **Note : By default, the Machine agent and AppServer agent can only send a fixed number of metrics to the controller. To change this limit, please follow the instructions mentioned [here](http://docs.appdynamics.com/display/PRO14S/Metrics+Limits).**
