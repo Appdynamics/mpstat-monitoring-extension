@@ -15,7 +15,7 @@ public class MPStatMonitorTest {
     @Test
     public void testMPStatMonitor() throws TaskExecutionException {
         Map<String, String> taskArgs = Maps.newHashMap();
-        taskArgs.put(CONFIG_ARG,"src/test/resources/conf/config.yml");
+        taskArgs.put(CONFIG_ARG, "src/test/resources/conf/config.yml");
 
         MPStatMonitor monitor = new MPStatMonitor();
         monitor.execute(taskArgs, null);

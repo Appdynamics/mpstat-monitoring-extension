@@ -28,7 +28,8 @@ import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import com.singularity.ee.agent.systemagent.api.TaskExecutionContext;
 import com.singularity.ee.agent.systemagent.api.TaskOutput;
 import com.singularity.ee.agent.systemagent.api.exception.TaskExecutionException;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Map;
@@ -38,10 +39,9 @@ import java.util.Map;
  */
 public class MPStatMonitor extends AManagedMonitor {
 
-    private static Logger logger = Logger.getLogger(MPStatMonitor.class);
     public static final String METRIC_SEPARATOR = "|";
     public static final String CONFIG_ARG = "config-file";
-
+    private static Logger logger = LoggerFactory.getLogger(MPStatMonitor.class);
     private Parser parser;
 
     public MPStatMonitor() {
@@ -51,7 +51,7 @@ public class MPStatMonitor extends AManagedMonitor {
     }
 
     public TaskOutput execute(Map<String, String> taskArgs, TaskExecutionContext taskExecutionContext) throws TaskExecutionException {
-        if(taskArgs != null) {
+        if (taskArgs != null) {
             logger.info("Starting " + getImplementationVersion() + " Monitoring Task");
             try {
                 String configFilename = getConfigFilename(taskArgs.get(CONFIG_ARG));
@@ -77,10 +77,10 @@ public class MPStatMonitor extends AManagedMonitor {
             parser = new SolarisParser();
             logger.debug("OS System detected: Solaris");
         /*} else if (os.contains("aix")) {
-            //parser = new AIXParser(config);
+            parser = new AIXParser();
             logger.debug("OS System detected: IBM AIX");
         } else if (os.contains("hp-ux")) {
-            //parser = new HPUXParser(config);
+            parser = new HPUXParser(config);
             logger.debug("OS System detected: HP-UX");*/
         } else {
             logger.error("Your OS (" + os + ") is not supported. Quitting Process Monitor");
@@ -90,10 +90,10 @@ public class MPStatMonitor extends AManagedMonitor {
     }
 
     private void printMetrics(String metricPrefix, Map<String, Map<String, String>> metrics) {
-        for ( Map.Entry<String, Map<String, String>> processors : metrics.entrySet()) {
+        for (Map.Entry<String, Map<String, String>> processors : metrics.entrySet()) {
             String processorName = processors.getKey();
             Map<String, String> processorStats = processors.getValue();
-            for(Map.Entry<String, String> stat : processorStats.entrySet()) {
+            for (Map.Entry<String, String> stat : processorStats.entrySet()) {
                 String metricName = stat.getKey();
                 String value = stat.getValue();
                 printMetric(metricPrefix + processorName + METRIC_SEPARATOR + metricName, value);
@@ -101,24 +101,33 @@ public class MPStatMonitor extends AManagedMonitor {
         }
     }
 
-    private void printMetric(String metricName, String metricValue) {
-        MetricWriter metricWriter = getMetricWriter(metricName, MetricWriter.METRIC_AGGREGATION_TYPE_AVERAGE,
-                MetricWriter.METRIC_TIME_ROLLUP_TYPE_AVERAGE, MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_INDIVIDUAL);
+    private void printMetric(String metricName, String value) {
+        String metricValue = toWholeNumberString(metricName, value);
         if (!Strings.isNullOrEmpty(metricValue)) {
+            MetricWriter metricWriter = getMetricWriter(metricName, MetricWriter.METRIC_AGGREGATION_TYPE_AVERAGE,
+                    MetricWriter.METRIC_TIME_ROLLUP_TYPE_AVERAGE, MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_INDIVIDUAL);
             try {
                 metricWriter.printMetric(metricValue);
                 if (logger.isDebugEnabled()) {
                     logger.debug(metricName + " = " + metricValue);
                 }
             } catch (Exception e) {
-                logger.error(e);
+                logger.error("Error while reporting metric {}:{} ", metricName, value, e);
             }
-        } else {
-            logger.warn("Metric " + metricName + " is null");
         }
     }
 
-    private static String getConfigFilename(String filename) {
+    private String toWholeNumberString(String metricName, String attribute) {
+        try {
+            Double f1 = Double.valueOf(attribute);
+            return f1.doubleValue() > 0.0D && f1.doubleValue() < 1.0D ? "1" : String.valueOf(Math.round(f1.doubleValue()));
+        } catch (NumberFormatException e) {
+            logger.error("Invalid Metric:: {}:{} ", metricName, attribute, e);
+        }
+        return null;
+    }
+
+    private String getConfigFilename(String filename) {
         if (filename == null) {
             return "";
         }

@@ -27,32 +27,17 @@ import java.io.InputStreamReader;
 public class CommandExecutor {
     private static Logger logger = Logger.getLogger(CommandExecutor.class);
 
-    /*public static String execute(String command) throws MpStatMonitorException {
-        try {
-            String [] cmd = command.split("\\s+");
-            String commandOutput = new ProcessExecutor(cmd).timeout(60, TimeUnit.SECONDS).destroyOnExit()
-                    .exitValues(0).readOutput(true).execute().outputUTF8();
-            logger.info(commandOutput);
-            return commandOutput;
-        } catch (InvalidExitValueException e) {
-            logger.info("Process exited with " + e.getExitValue());
-            logger.info(e.getResult().outputUTF8());
-            throw new MpStatMonitorException("Error while executing command " + Arrays.toString(cmd), e);
-        } catch (Exception e) {
-            throw new MpStatMonitorException("Error while executing command " + Arrays.toString(cmd), e);
-        }
-    }*/
-
     public static String execute(String command) throws MpStatMonitorException {
         Runtime rt = Runtime.getRuntime();
         Process p = null;
         BufferedReader input = null;
         try {
+            logger.debug("Executing command " + command);
             p = rt.exec(command);
             input = new BufferedReader(new InputStreamReader(p.getInputStream()));
             StringBuilder sb = new StringBuilder();
             String line;
-            while((line = input.readLine()) != null) {
+            while ((line = input.readLine()) != null) {
                 sb.append(line).append(System.getProperty("line.separator"));
             }
             return sb.toString();
