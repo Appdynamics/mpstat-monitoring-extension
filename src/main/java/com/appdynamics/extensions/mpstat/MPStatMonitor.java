@@ -45,14 +45,12 @@ public class MPStatMonitor extends AManagedMonitor {
     private Parser parser;
 
     public MPStatMonitor() {
-        String msg = String.format("Using Monitor Version [ %s ]", getImplementationVersion());
-        logger.info(msg);
-        System.out.println(msg);
+        System.out.println(logVersion());
     }
 
     public TaskOutput execute(Map<String, String> taskArgs, TaskExecutionContext taskExecutionContext) throws TaskExecutionException {
         if (taskArgs != null) {
-            logger.info("Starting " + getImplementationVersion() + " Monitoring Task");
+            logger.info(logVersion());
             try {
                 String configFilename = getConfigFilename(taskArgs.get(CONFIG_ARG));
                 Configuration config = YmlReader.readFromFile(configFilename, Configuration.class);
@@ -146,5 +144,10 @@ public class MPStatMonitor extends AManagedMonitor {
 
     private String getImplementationVersion() {
         return MPStatMonitor.class.getPackage().getImplementationTitle();
+    }
+
+    private String logVersion() {
+        String msg = String.format("Using Monitor Version [ %s ]", getImplementationVersion());
+        return msg;
     }
 }

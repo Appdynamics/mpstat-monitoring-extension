@@ -75,10 +75,10 @@ public abstract class Parser {
             for (String headerString : headerStrings) {
                 if (headersList.contains(headerString)) {
                     headerInfo.put(headerString, headersList.indexOf(headerString));
-                } else {
-                    logger.error("Could not find correct header information for " + headerString + " while executing command " + command);
-                    throw new MpStatMonitorException("Could not find correct header information for " + headerString + " while executing command " + command);
-                }
+                } /*else {
+                    logger.warn("Could not find correct header information for " + headerString + " while executing command " + command);
+                    //throw new MpStatMonitorException("Could not find correct header information for " + headerString + " while executing command " + command);
+                }*/
             }
         } else {
             logger.error("Header of command {} output is null or empty", command);
